@@ -1,6 +1,7 @@
 package com.jonso.security.service;
 
 import com.jonso.security.entity.AppUser;
+import com.jonso.security.entity.enums.UserStatus;
 import com.jonso.security.error.AppErrors;
 import com.jonso.security.error.AppException;
 import com.jonso.security.repository.AppUserRepository;
@@ -17,12 +18,17 @@ public class AppUserService {
     private final PasswordEncoder passwordEncoder;
 
     public AppUserDTO saveUser(AppUserDTO appUserDTO) {
-        if (appUserRepository.existsUser(appUserDTO.getUsername(), appUserDTO.getEmail()))
-            throw new AppException(AppErrors.USER_ALREADY_EXISTS);
+        if (!appUserRepository.existsUser(appUserDTO.getUsername(), appUserDTO.getEmail())){
+            AppUser appUser = appUserDTO.toEntity();
+            appUser.setPassword(passwordEncoder.encode(appUserDTO.getPassword()));
+            appUser.setUserStatus(UserStatus.NEED_TO_CONFIRM);
+            return appUserRepository.save(appUser).toDTO();
+        }
 
-        AppUser appUser = appUserDTO.toEntity();
-        appUser.setPassword(passwordEncoder.encode(appUserDTO.getPassword()));
+        AppUser appUser = appUserRepository.findByUsername(appUserDTO.getUsername()).get();
+        if (appUser.getUserStatus() == UserStatus.NEED_TO_CONFIRM)
+            throw new AppException(AppErrors.NEED_TO_CONFIRM);
 
-        return appUserRepository.save(appUser).toDTO();
+        throw new AppException(AppErrors.USER_BLOCKED);
     }
 }

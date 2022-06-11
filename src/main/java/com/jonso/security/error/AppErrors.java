@@ -6,7 +6,9 @@ public enum AppErrors {
     EMAIL_NOT_VALID(100),
     PASSWORD_NOT_VALID(101),
     USER_ALREADY_EXISTS(102),
-    USER_NOT_FOUND(103)
+    USER_NOT_FOUND(103),
+    USER_BLOCKED(104),
+    NEED_TO_CONFIRM(105),
 
     ;
     private final int code;

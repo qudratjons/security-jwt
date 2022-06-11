@@ -10,6 +10,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 
 @CrossOrigin
 @RestController
@@ -22,13 +24,11 @@ public class JwtAuthenticationController {
     private JwtUserDetailsService userDetailsService;
 
     @PostMapping("/authenticate")
-    public ResponseEntity<JwtResponse> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest) {
+    public JwtResponse createAuthenticationToken(@Valid @RequestBody JwtRequest request) {
 
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername(), authenticationRequest.getPassword())
+                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
         );
-        return ResponseEntity.ok(
-                new JwtResponse(jwtTokenUtil.generateToken(userDetailsService.loadUserByUsername(authenticationRequest.getUsername())))
-        );
+        return new JwtResponse(jwtTokenUtil.generateToken(userDetailsService.loadUserByUsername(request.getUsername())));
     }
 }
